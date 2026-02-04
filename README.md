@@ -57,4 +57,4 @@ While highly accurate, the system operates within a specific diagnostic scope:
 
 ## 🔗 Live Deployment
 
-Access the live diagnostic tool here: **[Insert Your Deployed Streamlit Link Here]**
+Access the live diagnostic tool here: **[[Streamlit Link Here](https://agrivision-ai.streamlit.app/)]**
