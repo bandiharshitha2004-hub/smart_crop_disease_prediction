@@ -3,7 +3,7 @@ import tensorflow as tf
 from PIL import Image
 import numpy as np
 import os
-from pathlib import Path  # Added for robust path handling
+from pathlib import Path
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="AgriVision AI", page_icon="🌿", layout="centered")
@@ -74,22 +74,23 @@ target_image = None
 
 # Helper to load sample images safely
 def get_sample(filename):
-    sample_path = samples
+    # Builds the path using BASE_DIR and the 'samples' folder
+    sample_path = BASE_DIR / "samples" / filename
     if sample_path.exists():
         return Image.open(sample_path)
     else:
-        st.error(f"File {filename} not found at {sample_path}")
+        st.error(f"File not found: {sample_path}")
         return None
 
 with sample_col1:
     if st.button("Sample 1"):
-        target_image = get_sample("sample1.jpg")
+        target_image = get_sample("sample1.JPG")
 with sample_col2:
     if st.button("Sample 2"):
-        target_image = get_sample("sample2.jpg")
+        target_image = get_sample("sample2.JPG")
 with sample_col3:
     if st.button("Sample 3"):
-        target_image = get_sample("sample3.jpg")
+        target_image = get_sample("sample3.JPG")
 
 st.markdown("---")
 uploaded_file = st.file_uploader("Or upload your own leaf image...", type=["jpg", "jpeg", "png"])
@@ -108,7 +109,6 @@ if target_image:
     with result_col:
         # Preprocessing
         processed_img = target_image.resize((224, 224))
-        # Ensure image is RGB (some JPGs can be problematic)
         if processed_img.mode != "RGB":
             processed_img = processed_img.convert("RGB")
             
@@ -128,4 +128,3 @@ if target_image:
             st.success(f"Status: {status} ✅")
         else:
             st.error(f"Status: {status} ⚠️")
-
