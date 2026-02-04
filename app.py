@@ -74,7 +74,7 @@ target_image = None
 
 # Helper to load sample images safely
 def get_sample(filename):
-    sample_path = BASE_DIR / "samples" / filename
+    sample_path = samples
     if sample_path.exists():
         return Image.open(sample_path)
     else:
@@ -128,3 +128,4 @@ if target_image:
             st.success(f"Status: {status} ✅")
         else:
             st.error(f"Status: {status} ⚠️")
+
