@@ -1,60 +1,120 @@
 # AgriVision: Intelligent Plant Disease Diagnostics
 
-AgriVision is an advanced deep-learning project designed to provide instant, automated identification of plant diseases from leaf images. By leveraging high-performance computer vision, this system empowers farmers and researchers to diagnose crop issues accurately, facilitating timely intervention and reducing crop loss.
+AgriVision is an advanced deep-learning project designed to provide instant, automated identification of plant diseases from leaf images. By leveraging high-performance computer vision and generative AI–powered recommendations, this system empowers farmers, agronomists, and researchers to diagnose crop issues accurately, take timely action, and significantly reduce crop loss.
+
+---
 
 ## 📊 Dataset & Configuration
 
-This project utilizes the **PlantVillage Dataset**, a comprehensive repository containing over 54,000 images of healthy and diseased crop leaves. The dataset is accessed via the Kaggle API.
+This project utilizes the **PlantVillage Dataset**, a large-scale, open-source repository containing over **54,000 labeled images** of healthy and diseased crop leaves. The dataset is accessed programmatically using the **Kaggle API**, enabling automated and reproducible model training.
 
 ### **Kaggle Setup Instructions**
 
-To access the dataset during the model training phase, a `kaggle.json` file is required for authentication.
+To download the dataset during training, a `kaggle.json` file is required for authentication.
 
-1. Go to your **Kaggle Account** settings.
-2. Scroll to the **API** section and click **"Create New API Token"**.
-3. Download the `kaggle.json` file.
-4. Upload this file into your environment when prompted to allow the script to download the **abdallahalidev/plantvillage-dataset** automatically.
+1. Log in to your **Kaggle account**.
+2. Navigate to **Account Settings**.
+3. Scroll to the **API** section and click **"Create New API Token"**.
+4. Download the generated `kaggle.json` file.
+5. Upload this file into your working environment when prompted. The script will then automatically download the dataset: **abdallahalidev/plantvillage-dataset**.
+
+---
 
 ## ⚙️ Technical Workflow & Architecture
 
 ### **Core Architecture: MobileNetV2**
 
-The system is built on the **MobileNetV2** architecture, a powerful convolutional neural network (CNN) optimized for mobile and edge devices.
+AgriVision is built on **MobileNetV2**, a lightweight yet highly effective convolutional neural network (CNN) optimized for real-time and resource-constrained environments.
 
-* **Why MobileNetV2?** Unlike heavier models like ResNet or VGG, MobileNetV2 uses depthwise separable convolutions to significantly reduce the number of parameters and computational cost without sacrificing high accuracy.
-* **Transfer Learning:** The model utilizes weights pre-trained on the **ImageNet** dataset. This allows the AI to start with a sophisticated understanding of shapes and textures, which is then fine-tuned specifically for botanical patterns.
-* **Fine-Tuning Strategy:** To optimize performance, the first 100 layers of the base model are frozen to preserve general feature extraction, while the remaining layers are unfrozen to adapt specifically to plant disease features.
+**Why MobileNetV2?**
 
-### **Data Augmentation**
+* Uses **depthwise separable convolutions**, drastically reducing computational cost.
+* Requires fewer parameters compared to heavier models such as VGG or ResNet.
+* Delivers high accuracy while remaining suitable for web and mobile deployment.
 
-To improve the model's ability to generalize to real-world photos (which may have varied lighting or angles), **ImageDataGenerator** was used to implement data augmentation.
+### **Transfer Learning Strategy**
 
-* **Techniques used:** The training data was subjected to 20-degree rotations, 20% width/height shifts, and horizontal flips.
-* **Importance:** This process artificially expands the dataset, preventing the model from "memorizing" specific training images (overfitting) and ensuring it recognizes leaves regardless of their orientation in a user's photo.
+* Pre-trained weights from the **ImageNet** dataset are used to initialize the model.
+* The **first 100 layers are frozen** to retain generic feature extraction (edges, textures, shapes).
+* Remaining layers are **fine-tuned** to specialize in plant disease characteristics such as spots, discoloration, and leaf deformities.
 
-## 📈 Performance Metrics
+---
 
-The dataset was split into **80% Training**, **10% Validation**, and **10% Testing** sets using a fixed seed for reproducibility.
+## 🔄 Data Augmentation
 
-| Metric | Training Set | Validation Set | Testing Set |
-| --- | --- | --- | --- |
-| **Accuracy** | 98.21% | 95.49% | 94.50% |
-| **Loss** | 0.0232 | 0.0465 | 0.0451 |
-| **Precision** | 0.9726 | 0.9567 | 0.9257 |
-| **Recall** | 0.9615 | 0.9439 | 0.9144 |
-| **F1-Score** | 0.9670 | 0.9503 | 0.9200 |
+To enhance robustness and generalization to real-world conditions, **ImageDataGenerator** was employed for data augmentation.
 
-*(Note: F1-Scores calculated using the harmonic mean of Precision and Recall as per standard evaluation practices.)*
+**Applied Techniques:**
+
+* Rotation up to **20 degrees**
+* Width and height shifts of **20%**
+* **Horizontal flipping**
+
+**Impact:**
+This approach increases dataset diversity, minimizes overfitting, and ensures reliable predictions across varying lighting conditions, angles, and backgrounds.
+
+---
+
+## 📈 Model Performance Metrics
+
+The dataset was split using a fixed random seed for reproducibility:
+
+* **80% Training**
+* **10% Validation**
+* **10% Testing**
+
+### **Evaluation Results (Final Model)**
+
+| Dataset        | Accuracy | Precision | Recall | F1-Score |
+| -------------- | -------- | --------- | ------ | -------- |
+| **Training**   | 99.68%   | 0.9970    | 0.9968 | 0.9969   |
+| **Validation** | 99.04%   | 0.9915    | 0.9902 | 0.9909   |
+| **Testing**    | 99.05%   | 0.9912    | 0.9897 | 0.9905   |
+
+These results demonstrate strong generalization performance, minimal overfitting, and high diagnostic reliability across unseen data.
+
+---
+
+## 🤖 AI-Powered Disease Suggestions (Groq API Integration)
+
+Beyond disease classification, AgriVision integrates the **Groq API** to provide **intelligent, context-aware recommendations** when a disease is detected.
+
+### **How It Works**
+
+* Once the CNN predicts a disease class, the result is passed to the **Groq LLM API**.
+* The model generates **actionable suggestions**.
+
+### **Benefits**
+
+* Transforms raw predictions into **farmer-friendly insights**.
+* Reduces dependency on agricultural experts for basic diagnostics.
+* Enhances decision-making by coupling vision intelligence with generative AI.
+
+If the detected disease confidence is below **60%**, the system flags the output as **unreliable** and avoids generating misleading recommendations.
+
+---
 
 ## ⚠️ Scope & Limitations
 
-While highly accurate, the system operates within a specific diagnostic scope:
+* **Supported Classes:** 38 disease and healthy classes
+* **Supported Species (14):**
+  Apple, Blueberry, Cherry, Corn, Grape, Orange, Peach, Bell Pepper, Potato, Raspberry, Soybean, Squash, Strawberry, Tomato
 
-* **Species & Classes:** The model can detect **38 distinct health classes** across **14 different plant species**.
-* **Detected Plants:** Apple, Blueberry, Cherry, Corn, Grape, Orange, Peach, Pepper (Bell), Potato, Raspberry, Soybean, Squash, Strawberry, and Tomato.
-* **Diagnostic Limitation:** The AI is specialized for these 14 species; it may provide unreliable results for plants outside this scope.
-* **Confidence Guard:** The system includes a reliability check; predictions with a confidence score lower than **60%** are flagged as potentially unreliable to ensure user safety.
+**Limitations:**
+
+* Predictions for plant species outside this list may be inaccurate.
+* Performance may degrade on images with extreme blur, occlusion, or non-leaf objects.
+
+---
 
 ## 🔗 Live Deployment
 
-Access the live diagnostic tool here: **[[Streamlit Link Here](https://agrivision-ai.streamlit.app/)]**
+The application is deployed using **Streamlit**, enabling real-time disease detection through a simple web interface.
+
+👉 **Live App:** [https://agrivision-ai.streamlit.app/](https://agrivision-ai.streamlit.app/)
+
+---
+
+## ✅ Conclusion
+
+AgriVision combines **deep learning**, **transfer learning**, and **generative AI** to deliver an end-to-end intelligent plant disease diagnostic system. With high accuracy, real-time inference, and actionable AI-driven recommendations, the platform serves as a practical and scalable solution for modern agriculture.
