@@ -5,17 +5,17 @@ import numpy as np
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import google.generativeai as genai
+from groq import Groq  # Updated library
 
 # --- LOAD ENVIRONMENT VARIABLES ---
 load_dotenv()
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Configure Google Gemini API
-if GOOGLE_API_KEY:
-    genai.configure(api_key=GOOGLE_API_KEY)
+# Initialize Groq Client
+if GROQ_API_KEY:
+    client = Groq(api_key=GROQ_API_KEY)
 else:
-    st.warning("⚠️ API Key not found. Please check your .env file.")
+    st.warning("⚠️ Groq API Key not found. Please check your .env file.")
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="AgriVision AI", page_icon="🌿", layout="centered")
@@ -68,16 +68,24 @@ def load_assets():
 
 model, class_indices = load_assets()
 
-# --- AI SUGGESTION LOGIC ---
+# --- AI SUGGESTION LOGIC (GROQ) ---
 def get_ai_suggestions(plant_name, disease_name):
-    """Fetches treatment suggestions from Google Gemini."""
+    """Fetches treatment suggestions from Groq."""
     try:
-        gemini_model = genai.GenerativeModel('gemini-pro')
-        prompt = (f"Act as an expert agronomist. The plant '{plant_name}' has been diagnosed with '{disease_name}'. "
-                  f"Provide 3 clear, actionable treatment steps (organic or chemical) and 1 prevention tip. "
-                  f"Keep the response brief and professional.")
-        response = gemini_model.generate_content(prompt)
-        return response.text
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert agronomist. Provide professional, concise, and actionable advice."
+                },
+                {
+                    "role": "user",
+                    "content": f"The plant '{plant_name}' has been diagnosed with '{disease_name}'. Provide 3 clear treatment steps (organic or chemical) and 1 prevention tip. Keep it brief."
+                }
+            ],
+            model="llama-3.3-70b-versatile", # Using Llama 3 for fast, high-quality responses
+        )
+        return chat_completion.choices[0].message.content
     except Exception as e:
         return f"Error fetching suggestions: {str(e)}"
 
@@ -161,7 +169,7 @@ if target_image:
         else:
             st.error(f"Status: {status} ⚠️")
             
-            # --- GOOGLE AI SUGGESTION BUTTON ---
+            # --- GROQ AI SUGGESTION BUTTON ---
             if st.button("🔍 Get Treatment Suggestions"):
                 with st.spinner(f"Analyzing treatment for {status}..."):
                     advice = get_ai_suggestions(plant, status)
