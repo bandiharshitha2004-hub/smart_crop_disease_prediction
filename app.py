@@ -4,6 +4,18 @@ from PIL import Image
 import numpy as np
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+import google.generativeai as genai
+
+# --- LOAD ENVIRONMENT VARIABLES ---
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+# Configure Google Gemini API
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
+else:
+    st.warning("⚠️ API Key not found. Please check your .env file.")
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="AgriVision AI", page_icon="🌿", layout="centered")
@@ -33,6 +45,13 @@ st.markdown("""
         color: white;
         border-radius: 8px;
         font-weight: bold;
+        width: 100%;
+    }
+    .suggestion-box {
+        background-color: #e3f2fd;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 5px solid #2196f3;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -48,6 +67,19 @@ def load_assets():
     return model, class_indices
 
 model, class_indices = load_assets()
+
+# --- AI SUGGESTION LOGIC ---
+def get_ai_suggestions(plant_name, disease_name):
+    """Fetches treatment suggestions from Google Gemini."""
+    try:
+        gemini_model = genai.GenerativeModel('gemini-pro')
+        prompt = (f"Act as an expert agronomist. The plant '{plant_name}' has been diagnosed with '{disease_name}'. "
+                  f"Provide 3 clear, actionable treatment steps (organic or chemical) and 1 prevention tip. "
+                  f"Keep the response brief and professional.")
+        response = gemini_model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Error fetching suggestions: {str(e)}"
 
 # --- SIDEBAR ---
 st.sidebar.header("🌿 Supported Plants")
@@ -72,9 +104,7 @@ sample_col1, sample_col2, sample_col3 = st.columns(3)
 
 target_image = None
 
-# Helper to load sample images safely
 def get_sample(filename):
-    # Builds the path using BASE_DIR and the 'samples' folder
     sample_path = BASE_DIR / "samples" / filename
     if sample_path.exists():
         return Image.open(sample_path)
@@ -104,7 +134,7 @@ if target_image:
     
     with img_col:
         st.write("**Leaf Image:**")
-        st.image(target_image, width=280)
+        st.image(target_image, use_container_width=True)
     
     with result_col:
         # Preprocessing
@@ -124,7 +154,16 @@ if target_image:
         
         st.write("**Analysis Result:**")
         st.metric("Crop Type", plant)
+        
         if "Healthy" in status:
             st.success(f"Status: {status} ✅")
+            st.write("Your plant looks great! Keep up the good work.")
         else:
             st.error(f"Status: {status} ⚠️")
+            
+            # --- GOOGLE AI SUGGESTION BUTTON ---
+            if st.button("🔍 Get Treatment Suggestions"):
+                with st.spinner(f"Analyzing treatment for {status}..."):
+                    advice = get_ai_suggestions(plant, status)
+                    st.markdown("### 💡 Expert Advice")
+                    st.info(advice)
