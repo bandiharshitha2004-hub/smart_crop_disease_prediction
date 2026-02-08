@@ -1,6 +1,6 @@
-# AgriVision: Intelligent Plant Disease Diagnostics
+# Smart Crop Disease Prediction
 
-AgriVision is an advanced deep-learning project designed to provide instant, automated identification of plant diseases from leaf images. By leveraging high-performance computer vision and generative AI–powered recommendations, this system empowers farmers, agronomists, and researchers to diagnose crop issues accurately, take timely action, and significantly reduce crop loss.
+Smart Crop Disease Prediction : an advanced deep-learning project designed to provide instant, automated identification of plant diseases from leaf images. By leveraging high-performance computer vision and generative AI–powered recommendations, this system empowers farmers, agronomists, and researchers to diagnose crop issues accurately, take timely action, and significantly reduce crop loss.
 
 ---
 
